@@ -1,0 +1,90 @@
+@echo off
+chcp 65001 >nul
+echo.
+echo ===============================================
+echo     🧹 تنظيف مشروع سوق سمارت
+echo ===============================================
+echo.
+
+set "PROJECT_ROOT=%~dp0.."
+cd /d "%PROJECT_ROOT%"
+
+echo 📍 الموقع: %CD%
+echo.
+
+echo 📋 قائمة الملفات المراد تنظيفها:
+echo.
+
+set /p CONFIRM=هل أنت متأكد من التنظيف؟ (y/n): 
+if /i not "%CONFIRM%"=="y" (
+    echo ❌ تم إلغاء العملية
+    timeout /t 2 /nobreak >nul
+    exit /b 0
+)
+
+echo.
+echo 🗑️  بدء عملية التنظيف...
+echo.
+
+REM حذف مجلدات node_modules
+if exist "node_modules" (
+    echo ⏳ حذف node_modules...
+    rmdir /s /q "node_modules" 2>nul
+    if exist "node_modules" (
+        echo ❌ فشل حذف node_modules
+    ) else (
+        echo ✅ تم حذف node_modules
+    )
+) else (
+    echo ℹ️  node_modules غير موجود
+)
+
+REM حذف ملفات القفل
+for %%f in (package-lock.json yarn.lock pnpm-lock.yaml) do (
+    if exist "%%f" (
+        echo ⏳ حذف %%f...
+        del /f /q "%%f" 2>nul
+        if exist "%%f" (
+            echo ❌ فشل حذف %%f
+        ) else (
+            echo ✅ تم حذف %%f
+        )
+    ) else (
+        echo ℹ️  %%f غير موجود
+    )
+)
+
+REM حذف مجلدات البناء
+if exist "build" (
+    echo ⏳ حذف build...
+    rmdir /s /q "build" 2>nul
+    if exist "build" (
+        echo ❌ فشل حذف build
+    ) else (
+        echo ✅ تم حذف build
+    )
+)
+
+if exist "dist" (
+    echo ⏳ حذف dist...
+    rmdir /s /q "dist" 2>nul
+    if exist "dist" (
+        echo ❌ فشل حذف dist
+    ) else (
+        echo ✅ تم حذف dist
+    )
+)
+
+REM حذف الملفات المؤقتة
+echo ⏳ حذف الملفات المؤقتة...
+del /f /q "*.log" 2>nul
+del /f /q "*.tmp" 2>nul
+del /f /q ".DS_Store" 2>nul
+echo ✅ تم حذف الملفات المؤقتة
+
+echo.
+echo 🎉 تم تنظيف المشروع بنجاح!
+echo 📁 الحجم المتبقي: 
+for /f "tokens=3" %%a in ('dir /-c /w ^| findstr /c:"(s)"') do echo %%a بايت
+echo.
+pause
